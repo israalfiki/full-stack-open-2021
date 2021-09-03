@@ -1,6 +1,8 @@
 const express = require('express')
 const app = express()
 
+app.use(express.json())
+
 let data = [
     { 
       "id": 1,
@@ -45,6 +47,35 @@ app.delete('/api/persons/:id',(req,res)=>{
     data= data.filter(person=>person.id!==id)
     res.send(204).end()
 
+})
+
+app.post('/api/persons',(req,res)=>{
+    const name = req.body.name
+    const number = req.body.number
+
+    if(!name){
+        return res.status(400).json({"error":"name is missing"})
+    }
+    else if(data.some(person=>person.name===name)){
+        return res.status(400).json({"error":"name must be unique"})
+    }
+
+    if(!number){
+        return res.status(400).json({
+            "error":"number is missing"
+        })
+    }
+
+    const person = {
+        id: Math.random(),
+        name:name,
+        number:number
+    }
+
+    data.push(person)
+    res.json(person)
+
+    
 })
 
 app.get('/api/info',(req,res)=>{
