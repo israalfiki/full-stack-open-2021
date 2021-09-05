@@ -97,7 +97,7 @@ app.get('/api/info',(req,res)=>{
 })
 
 
-
+console.log(process.argv.length)
 
 const PORT = 3001;
 app.listen(PORT,()=>{
