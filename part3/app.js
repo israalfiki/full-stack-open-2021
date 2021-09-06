@@ -1,6 +1,10 @@
 const express = require('express')
 const morgan = require('morgan')
 
+require('dotenv').config()
+
+const Person = require('./models/person')
+
 const app = express()
 
 app.use(express.json())
@@ -38,36 +42,50 @@ let data = [
 ]
 
 app.get('/api/persons',(req,res)=>{
-    res.json(data)
+    Person.find()
+    .then((persons)=>{
+        res.json(persons)        
+    })
+    .catch(err=>console.log(err))
     
 })
 
 app.get('/api/persons/:id',(req,res)=>{
-    const id = +req.params.id;
-    const person = data.find(person=>person.id===id)
-    if(person){
-        res.json(person)
-    }else{
-        res.statusMessage = "Not found!"
-        res.status(404).end()
-    }
+    const id = req.params.id;
+    Person.findById(id)
+    .then((person)=>{
+        if(person){
+            res.json(person)
+        }else{
+            res.statusMessage = "Not found!"
+            res.status(404).end()
+        }
+    })
+    .catch(err=>console.log(err))
+   
 })
 
 app.delete('/api/persons/:id',(req,res)=>{
-    const id = +req.params.id;
-    data= data.filter(person=>person.id!==id)
-    res.send(204).end()
+    const id = req.params.id;
+    Person.deleteOne({id:id})
+    .then((result)=>{
+        console.log('deleted!')
+        res.send(204).end()
+    })
+    .catch(err=>console.log(err))
 
 })
 
-app.post('/api/persons',(req,res)=>{
+app.post('/api/persons',async (req,res)=>{
     const name = req.body.name
     const number = req.body.number
+
+    const persons = await Person.find()
 
     if(!name){
         return res.status(400).json({"error":"name is missing"})
     }
-    else if(data.some(person=>person.name===name)){
+    else if(persons.some(person=>person.name===name)){
         return res.status(400).json({"error":"name must be unique"})
     }
 
@@ -77,29 +95,31 @@ app.post('/api/persons',(req,res)=>{
         })
     }
 
-    const person = {
-        id: Math.random(),
+
+    const person = new Person({
         name:name,
         number:number
-    }
+    })
 
-    data.push(person)
-    res.json(person)
-
+    person.save()
+    .then((person)=>{
+        console.log('saved!')
+        res.json(person)
+    })
+    .catch(err=>console.log(err))
     
 })
 
-app.get('/api/info',(req,res)=>{
+app.get('/api/info',async (req,res)=>{
     const date =new Date()
-    res.write(`Phonebook has info for ${data.length} people\n`)
+    let persons = await Person.find()
+    res.write(`Phonebook has info for ${persons.length} people\n`)
     res.write(date.toString())
     res.end()
 })
 
 
-console.log(process.argv.length)
-
-const PORT = 3001;
+const PORT = process.env.PORT;
 app.listen(PORT,()=>{
     console.log(`app is running on port ${PORT}`)
 })
