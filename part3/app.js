@@ -110,6 +110,21 @@ app.post('/api/persons',async (req,res)=>{
     
 })
 
+app.put('/api/persons/:id',(req,res,next)=>{
+    const id = req.params.id
+    const person = {
+        name:req.body.name,
+        number:req.body.number
+    }
+    Person.findByIdAndUpdate(id, person,{new:true})
+    .then((result)=>{
+        console.log(result)
+        res.json(result)
+    })
+    .catch(err=>next(err))
+    
+})
+
 app.get('/api/info',async (req,res)=>{
     const date =new Date()
     let persons = await Person.find()
