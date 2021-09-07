@@ -50,7 +50,7 @@ app.get('/api/persons',(req,res)=>{
     
 })
 
-app.get('/api/persons/:id',(req,res)=>{
+app.get('/api/persons/:id',(req,res,next)=>{
     const id = req.params.id;
     Person.findById(id)
     .then((person)=>{
@@ -61,7 +61,7 @@ app.get('/api/persons/:id',(req,res)=>{
             res.status(404).end()
         }
     })
-    .catch(err=>console.log(err))
+    .catch(err=>next(err))
    
 })
 
@@ -118,6 +118,24 @@ app.get('/api/info',async (req,res)=>{
     res.end()
 })
 
+
+//loading not found
+app.use((req,res)=>{
+    res.status(400).json({
+        "error":"unknown endpoint"
+    })
+})
+
+//error handler route
+app.use((error,req,res,next)=>{
+    console.log('we are here bitch')
+    console.log(error.name)
+    if(error.name==='CastError'){
+        console.log('we are hereee')
+        return res.status(400).send({"error":"malformatted id"})
+    }
+    // next(error)
+})
 
 
 
