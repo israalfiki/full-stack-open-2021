@@ -143,10 +143,8 @@ app.use((req,res)=>{
 
 //error handler route
 app.use((error,req,res,next)=>{
-    console.log('we are here bitch')
     console.log(error.name)
     if(error.name==='CastError'){
-        console.log('we are hereee')
         return res.status(400).send({"error":"malformatted id"})
     }
     // next(error)
