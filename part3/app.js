@@ -65,14 +65,14 @@ app.get('/api/persons/:id',(req,res)=>{
    
 })
 
-app.delete('/api/persons/:id',(req,res)=>{
+app.delete('/api/persons/:id',(req,res,next)=>{
     const id = req.params.id;
-    Person.deleteOne({id:id})
+    Person.findByIdAndDelete(id)
     .then((result)=>{
         console.log('deleted!')
-        res.send(204).end()
+        res.status(204).end()
     })
-    .catch(err=>console.log(err))
+    .catch(err=>next(err))
 
 })
 
@@ -117,6 +117,8 @@ app.get('/api/info',async (req,res)=>{
     res.write(date.toString())
     res.end()
 })
+
+
 
 
 const PORT = process.env.PORT;
